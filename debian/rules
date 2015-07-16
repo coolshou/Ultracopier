@@ -28,6 +28,7 @@ archplugins:= \
 	plugins-alternative/Themes/Teracopy \
 	plugins-alternative/PluginLoader/keybinding 
 	
+#	plugins-alternative/Themes/Supercopier 
 #	plugins/CopyEngine/Rsync 
 #	plugins/Listener/dbus 
 
@@ -42,7 +43,12 @@ language_ts_to_qm:
 	lrelease ultracopier-core.pro
 	lrelease plugins/CopyEngine/Ultracopier/CopyEngine.pro
 	lrelease plugins/Themes/Oxygen/interface.pro
-
+	lrelease plugins/PluginLoader/catchcopy-v0002/pluginLoader.pro
+	lrelease plugins-alternative/PluginLoader/keybinding/pluginLoader.pro 
+	lrelease plugins-alternative/Themes/Clean/interface.pro 
+	#lrelease plugins-alternative/Themes/Supercopier/interface.pro 
+	lrelease plugins-alternative/Themes/Teracopy/interface.pro 
+	
 override_dh_auto_configure: debian/detect_arch language_ts_to_qm
 	find plugins/Languages -name flag.png -exec chmod a-x {} +
 	ucp_arch=$$(debian/detect_arch) ; \
@@ -52,19 +58,45 @@ override_dh_auto_configure: debian/detect_arch language_ts_to_qm
 	cd plugins/CopyEngine/Ultracopier/ ; qmake CopyEngine.pro 
 	cd plugins/Listener/catchcopy-v0002/ ; qmake listener.pro
 	cd plugins/Themes/Oxygen/; qmake interface.pro
+	cd plugins/PluginLoader/catchcopy-v0002/; qmake pluginLoader.pro
+	cd plugins/SessionLoader/KDE4/; qmake sessionLoader.pro
+	
+	cd plugins-alternative/PluginLoader/keybinding; qmake pluginLoader.pro 
+	cd plugins-alternative/Themes/Clean; qmake interface.pro 
+	#cd plugins-alternative/Themes/Supercopier; qmake interface.pro 
+	cd plugins-alternative/Themes/Teracopy; qmake interface.pro 
+	
 	qmake QMAKE_CXXFLAGS="-I./plugins/CopyEngine/Ultracopier/ -L./plugins/CopyEngine/Ultracopier/ \
 	 -I./plugins/Listener/catchcopy-v0002/ -L./plugins/Listener/catchcopy-v0002/ \
 	 -I./plugins/Themes/Oxygen/ -L./plugins/Themes/Oxygen/" ultracopier-core.pro
-
+	 
+	touch .configure
+	
 override_dh_auto_clean:
-	rm -f build
-	$(MAKE) -C plugins/CopyEngine/Ultracopier/ clean
+	dh_auto_clean -- -C plugins/CopyEngine/Ultracopier/
 	rm -f plugins/CopyEngine/Ultracopier/libcopyEngine.so 
-	$(MAKE) -C plugins/Listener/catchcopy-v0002/ clean
+
+	dh_auto_clean -- -C plugins/Listener/catchcopy-v0002/
 	rm -f plugins/Listener/catchcopy-v0002/liblistener.so
-	$(MAKE) -C plugins/Themes/Oxygen/ clean
+
+	dh_auto_clean -- -C plugins/Themes/Oxygen/
 	rm -f plugins/Themes/Oxygen/libinterface.so
-	#$(MAKE) clean
+
+	dh_auto_clean -- -C plugins/PluginLoader/catchcopy-v0002/
+	rm -f plugins/PluginLoader/catchcopy-v0002/libpluginLoader.so
+
+	dh_auto_clean -- -C plugins/SessionLoader/KDE4/
+	rm -f plugins/SessionLoader/KDE4/libsessionLoader.so
+
+	dh_auto_clean -- -C plugins-alternative/PluginLoader/keybinding 
+	rm -f plugins-alternative/PluginLoader/keybinding/libpluginLoader.so
+
+	dh_auto_clean -- -C plugins-alternative/Themes/Clean
+	rm -f plugins-alternative/Themes/Clean/libinterface.so
+	#dh_auto_clean -- -C plugins-alternative/Themes/Supercopier
+	#rm -f plugins-alternative/Themes/Supercopier/libinterface.so
+	dh_auto_clean -- -C plugins-alternative/Themes/Teracopy
+	rm -f plugins-alternative/Themes/Teracopy/libinterface.so
 	
 	for pluginsxml in $(patsubst %,%/informations.xml,$(archplugins)) ; do \
 		sed -i -r 's|(<architecture>).*(</architecture>)|\1windows-x86\2|' $$pluginsxml; \
@@ -79,33 +111,68 @@ override_dh_auto_clean:
 	for dir in $(exelang); do rm -f plugins/CopyEngine/Ultracopier/Languages/$$dir/*.qm ; done
 	#plugins/Themes/Oxygen/Languages/
 	for dir in $(exelang); do rm -f plugins/Themes/Oxygen/Languages/$$dir/*.qm ; done
-	
-	dh_auto_clean
+	#plugins/PluginLoader/catchcopy-v0002/Languages/
+	for dir in $(exelang); do rm -f plugins/PluginLoader/catchcopy-v0002/Languages/$$dir/*.qm ; done
+	#plugins-alternative/PluginLoader/keybinding/Languages/ 
+	for dir in $(exelang); do rm -f plugins-alternative/PluginLoader/keybinding/Languages/$$dir/*.qm ; done
+	#plugins-alternative/Themes/Clean/Languages/ 
+	for dir in $(exelang); do rm -f plugins-alternative/Themes/Clean/Languages/$$dir/*.qm ; done
+	#plugins-alternative/Themes/Supercopier/Languages/
+	#for dir in $(exelang); do rm -f plugins-alternative/Themes/Supercopier/Languages/$$dir/*.qm ; done
+	#plugins-alternative/Themes/Teracopy/Languages/
+	for dir in $(exelang); do rm -f plugins-alternative/Themes/Teracopy/Languages/$$dir/*.qm ; done
 
+	dh_auto_clean
+	rm -f .build .configure
+	
 override_dh_auto_build:
-	$(MAKE) -C plugins/CopyEngine/Ultracopier/
-	$(MAKE) -C plugins/Listener/catchcopy-v0002/
-	$(MAKE) -C plugins/Themes/Oxygen/
-	$(MAKE) 
-	touch build
+	dh_auto_build -- -C plugins/CopyEngine/Ultracopier/
+	dh_auto_build -- -C plugins/Listener/catchcopy-v0002/
+	dh_auto_build -- -C plugins/Themes/Oxygen/
+	dh_auto_build -- -C plugins/PluginLoader/catchcopy-v0002/
+	dh_auto_build -- -C plugins/SessionLoader/KDE4/
+	dh_auto_build -- -C plugins-alternative/PluginLoader/keybinding 
+	dh_auto_build -- -C plugins-alternative/Themes/Clean/
+	#dh_auto_build -- -C plugins-alternative/Themes/Supercopier/ 
+	dh_auto_build -- -C plugins-alternative/Themes/Teracopy/
+	
+	dh_auto_build 
+
+	touch .build
 	
 override_dh_auto_install:
-	mkdir -p debian/ultracopier/usr/share/ultracopier/CopyEngine/Ultracopier/
-	mkdir -p debian/ultracopier/usr/share/ultracopier/Listener/catchcopy-v0002/
-	mkdir -p debian/ultracopier/usr/share/ultracopier/Themes/Oxygen/
-	mkdir -p debian/ultracopier/usr/bin/
-
+	#CopyEngine
 	dh_install plugins/CopyEngine/Ultracopier/libcopyEngine.so /usr/share/ultracopier/CopyEngine/Ultracopier/
 	dh_install plugins/CopyEngine/Ultracopier/informations.xml /usr/share/ultracopier/CopyEngine/Ultracopier/
 	dh_install plugins/CopyEngine/Ultracopier/Languages/ /usr/share/ultracopier/CopyEngine/Ultracopier/
-	
+	#Listener
 	dh_install plugins/Listener/catchcopy-v0002/liblistener.so /usr/share/ultracopier/Listener/catchcopy-v0002/
 	dh_install plugins/Listener/catchcopy-v0002/informations.xml /usr/share/ultracopier/Listener/catchcopy-v0002/
-	
+	#Themes
 	dh_install plugins/Themes/Oxygen/libinterface.so /usr/share/ultracopier/Themes/Oxygen/
 	dh_install plugins/Themes/Oxygen/informations.xml /usr/share/ultracopier/Themes/Oxygen/
 	dh_install plugins/Themes/Oxygen/Languages/ /usr/share/ultracopier/Themes/Oxygen/
-	
+	#PluginLoader
+	dh_install plugins/PluginLoader/catchcopy-v0002/libpluginLoader.so /usr/share/ultracopier/PluginLoader/catchcopy-v0002/
+	dh_install plugins/PluginLoader/catchcopy-v0002/informations.xml /usr/share/ultracopier/PluginLoader/catchcopy-v0002/
+	dh_install plugins/PluginLoader/catchcopy-v0002/Languages/ /usr/share/ultracopier/PluginLoader/catchcopy-v0002/
+	#SessionLoader
+	dh_install plugins/SessionLoader/KDE4/libsessionLoader.so /usr/share/ultracopier/SessionLoader/KDE4/
+	dh_install plugins/SessionLoader/KDE4/informations.xml /usr/share/ultracopier/SessionLoader/KDE4/
+	#keybinding
+	dh_install plugins-alternative/PluginLoader/keybinding/libpluginLoader.so  /usr/share/ultracopier/PluginLoader/keybinding/
+	dh_install plugins-alternative/PluginLoader/keybinding/informations.xml /usr/share/ultracopier/PluginLoader/keybinding/
+	dh_install plugins-alternative/PluginLoader/keybinding/Languages/ /usr/share/ultracopier/PluginLoader/keybinding/
+	#Other Themes
+	dh_install plugins-alternative/Themes/Clean/libinterface.so /usr/share/ultracopier/Themes/Clean/
+	dh_install plugins-alternative/Themes/Clean/informations.xml /usr/share/ultracopier/Themes/Clean/
+	dh_install plugins-alternative/Themes/Clean/Languages/ /usr/share/ultracopier/Themes/Clean/
+	#dh_install plugins-alternative/Themes/Supercopier/libinterface.so /usr/share/ultracopier/Themes/Supercopier/
+	#dh_install plugins-alternative/Themes/Supercopier/informations.xml /usr/share/ultracopier/Themes/Supercopier/
+	#dh_install plugins-alternative/Themes/Supercopier/Languages/ /usr/share/ultracopier/Themes/Supercopier/
+	dh_install plugins-alternative/Themes/Teracopy/libinterface.so /usr/share/ultracopier/Themes/Teracopy/
+	dh_install plugins-alternative/Themes/Teracopy/informations.xml /usr/share/ultracopier/Themes/Teracopy/
+	dh_install plugins-alternative/Themes/Teracopy/Languages/ /usr/share/ultracopier/Themes/Teracopy/
 	#main 
 	dh_install plugins/Languages/ /usr/share/ultracopier/
 	dh_install ultracopier /usr/bin/
