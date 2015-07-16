@@ -1,0 +1,16 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=Ultracopier
+Name[en_US]=Ultracopier
+Comment=Copy/Move files with lot of options
+Comment[en_US]=Copy/Move files with lot of options
+GenericName=Advanced copier
+GenericName[en_US]=Advanced copier
+Type=Application
+Exec=/usr/bin/ultracopier
+Icon=ultracopier.png
+Categories=Qt;Utility;
+StartupNotify=true
+Terminal=false
+X-KDE-SubstituteUID=false

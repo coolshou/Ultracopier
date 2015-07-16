@@ -1,0 +1,18 @@
+Source: ultracopier
+Section: utils
+Priority: optional
+Maintainer: jimmy <jimmy@jimmy-alpha>
+Build-Depends: debhelper (>= 9), qt5-qmake, qtbase5-dev, libqt5network5, libqt5xml5, libqt5widgets5
+Standards-Version: 3.9.5
+Homepage: http://ultracopier.first-world.info/
+#Vcs-Git: git://github.com/alphaonex86/Ultracopier.git
+#Vcs-Browser: https://github.com/alphaonex86/Ultracopier.git
+
+Package: ultracopier
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Ultracopier acts as a replacement for files copy dialogs
+ Ultracopier is free and open source software licensed under GPL3 that 
+ acts as a replacement for files copy dialogs. 
+ Main features include: play/pause, speed limitation, on-error resume, 
+ error/collision management ...

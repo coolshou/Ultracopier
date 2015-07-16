@@ -1,0 +1,118 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#DH_VERBOSE = 1
+
+# see EXAMPLES in dpkg-buildflags(1) and read /usr/share/dpkg/*
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+exelang:=ar de el es en fr hi hu id it ja ko nl no pl pt ru th tr zh
+archplugins:= \
+	plugins/CopyEngine/Ultracopier \
+	plugins/Listener/catchcopy-v0002 \
+	plugins/PluginLoader/catchcopy-v0002 \
+	plugins/SessionLoader/KDE4 \
+	plugins/SessionLoader/Windows \
+	plugins/Themes/Oxygen \
+	plugins-alternative/Themes/Clean \
+	plugins-alternative/Themes/Teracopy \
+	plugins-alternative/PluginLoader/keybinding 
+	
+#	plugins/CopyEngine/Rsync 
+#	plugins/Listener/dbus 
+
+debian/detect_arch: debian/detect_arch.cpp
+	dh_auto_configure --buildsystem=qmake -- debian/detect_arch.pro
+	make
+	make install
+	make distclean
+
+language_ts_to_qm:
+	#create language ts to qm
+	lrelease ultracopier-core.pro
+	lrelease plugins/CopyEngine/Ultracopier/CopyEngine.pro
+	lrelease plugins/Themes/Oxygen/interface.pro
+
+override_dh_auto_configure: debian/detect_arch language_ts_to_qm
+	find plugins/Languages -name flag.png -exec chmod a-x {} +
+	ucp_arch=$$(debian/detect_arch) ; \
+		for pluginsxml in $(patsubst %,%/informations.xml,$(archplugins)) ; do \
+			sed -i -r "s|(<architecture>).*(</architecture>)|\1$$ucp_arch\2|" $$pluginsxml; \
+		done
+	cd plugins/CopyEngine/Ultracopier/ ; qmake CopyEngine.pro 
+	cd plugins/Listener/catchcopy-v0002/ ; qmake listener.pro
+	cd plugins/Themes/Oxygen/; qmake interface.pro
+	qmake QMAKE_CXXFLAGS="-I./plugins/CopyEngine/Ultracopier/ -L./plugins/CopyEngine/Ultracopier/ \
+	 -I./plugins/Listener/catchcopy-v0002/ -L./plugins/Listener/catchcopy-v0002/ \
+	 -I./plugins/Themes/Oxygen/ -L./plugins/Themes/Oxygen/" ultracopier-core.pro
+
+override_dh_auto_clean:
+	rm -f build
+	$(MAKE) -C plugins/CopyEngine/Ultracopier/ clean
+	rm -f plugins/CopyEngine/Ultracopier/libcopyEngine.so 
+	$(MAKE) -C plugins/Listener/catchcopy-v0002/ clean
+	rm -f plugins/Listener/catchcopy-v0002/liblistener.so
+	$(MAKE) -C plugins/Themes/Oxygen/ clean
+	rm -f plugins/Themes/Oxygen/libinterface.so
+	#$(MAKE) clean
+	
+	for pluginsxml in $(patsubst %,%/informations.xml,$(archplugins)) ; do \
+		sed -i -r 's|(<architecture>).*(</architecture>)|\1windows-x86\2|' $$pluginsxml; \
+	done
+	rm -f debian/detect_arch
+	for dir in $(exelang); do chmod go+x plugins/Languages/$$dir/flag.png ; done
+	
+	#remove language *.qm
+	#plugins/Languages
+	for dir in $(exelang); do rm -f plugins/Languages/$$dir/*.qm ; done
+	#plugins/CopyEngine/Ultracopier/Languages/
+	for dir in $(exelang); do rm -f plugins/CopyEngine/Ultracopier/Languages/$$dir/*.qm ; done
+	#plugins/Themes/Oxygen/Languages/
+	for dir in $(exelang); do rm -f plugins/Themes/Oxygen/Languages/$$dir/*.qm ; done
+	
+	dh_auto_clean
+
+override_dh_auto_build:
+	$(MAKE) -C plugins/CopyEngine/Ultracopier/
+	$(MAKE) -C plugins/Listener/catchcopy-v0002/
+	$(MAKE) -C plugins/Themes/Oxygen/
+	$(MAKE) 
+	touch build
+	
+override_dh_auto_install:
+	mkdir -p debian/ultracopier/usr/share/ultracopier/CopyEngine/Ultracopier/
+	mkdir -p debian/ultracopier/usr/share/ultracopier/Listener/catchcopy-v0002/
+	mkdir -p debian/ultracopier/usr/share/ultracopier/Themes/Oxygen/
+	mkdir -p debian/ultracopier/usr/bin/
+
+	dh_install plugins/CopyEngine/Ultracopier/libcopyEngine.so /usr/share/ultracopier/CopyEngine/Ultracopier/
+	dh_install plugins/CopyEngine/Ultracopier/informations.xml /usr/share/ultracopier/CopyEngine/Ultracopier/
+	dh_install plugins/CopyEngine/Ultracopier/Languages/ /usr/share/ultracopier/CopyEngine/Ultracopier/
+	
+	dh_install plugins/Listener/catchcopy-v0002/liblistener.so /usr/share/ultracopier/Listener/catchcopy-v0002/
+	dh_install plugins/Listener/catchcopy-v0002/informations.xml /usr/share/ultracopier/Listener/catchcopy-v0002/
+	
+	dh_install plugins/Themes/Oxygen/libinterface.so /usr/share/ultracopier/Themes/Oxygen/
+	dh_install plugins/Themes/Oxygen/informations.xml /usr/share/ultracopier/Themes/Oxygen/
+	dh_install plugins/Themes/Oxygen/Languages/ /usr/share/ultracopier/Themes/Oxygen/
+	
+	#main 
+	dh_install plugins/Languages/ /usr/share/ultracopier/
+	dh_install ultracopier /usr/bin/
+	
+	#desktop
+	dh_install debian/ultracopier.desktop /usr/share/applications/
+	dh_install debian/ultracopier.png /usr/share/pixmaps
+	
+%:
+	dh $@ --buildsystem=qmake
