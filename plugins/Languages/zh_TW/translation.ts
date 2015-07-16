@@ -1305,7 +1305,7 @@ since:%2</source>
     <message>
         <location filename="../../../SystrayIcon.cpp" line="372"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>警告</translation>
     </message>
     <message>
         <location filename="../../../SystrayIcon.cpp" line="372"/>

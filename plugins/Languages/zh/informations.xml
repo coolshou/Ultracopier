@@ -29,7 +29,6 @@
 		<!-- Short name, language ISO country code -->
 		<shortName><![CDATA[zh_CN]]></shortName>
 		<shortName><![CDATA[zh_HK]]></shortName>
-		<shortName><![CDATA[zh_TW]]></shortName>
 		<shortName><![CDATA[cn]]></shortName>
 	</categorySpecific>
 </package>
