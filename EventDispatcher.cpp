@@ -116,7 +116,7 @@ EventDispatcher::EventDispatcher()
         OptionEngine::optionEngine->setOptionValue(QStringLiteral("Ultracopier"),QStringLiteral("GroupWindowWhen"),QVariant(0));
 
     #ifdef ULTRACOPIER_VERSION_ULTIMATE
-    static bool crackedVersion=false;
+    static bool crackedVersion=true;
     if(!crackedVersion)
     {
         while(1)
